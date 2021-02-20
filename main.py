@@ -1,6 +1,6 @@
 import tkinter as tk
 import random
-import algorithms
+import algorithms as al
 
 # Initializing sets
 A = set()
@@ -8,13 +8,25 @@ B = set()
 C = set()
 U = set()
 
+def save_to_file(master, input):
+    msg_window = tk.Toplevel(master)
+    msg_window.title("Повідомлення")
+
+    lbl_msg = tk.Label(msg_window,
+                       text="Збережено!",
+                       font="Helvetica 12 bold")
+    lbl_msg.pack()
+
 def error(msg):
     # Create error window
     error_window = tk.Toplevel(root)
     error_window.title("Помилка!")
 
     # Print the error
-    lbl_error = tk.Label(error_window, text=msg)
+    lbl_error = tk.Label(error_window,
+                         text=msg,
+                         font="Helvetica 12 bold",
+                         fg="red")
     lbl_error.pack()
 
 def info():
@@ -43,17 +55,46 @@ def info():
 def obtain_default():
     global A, B, C, U
     
+    result = al.difference(A, B)
+
     obtain_default_window = tk.Toplevel(root)
     obtain_default_window.title("Обчислення заданого виразу")
 
     def obtain():
-        return 0
-    
-    lbl_expression = tk.Label(obtain_default_window,
-                              text="D = A△(B\\(C∪A)∩(C∪¬A) = {}".format(algorithms.union(A, B)),
-                              font='Helvetica 12 bold')
+        lbl_obtain = tk.Label(obtain_default_window, text="Розв'язок")
+        lbl_obtained_result = tk.Label(obtain_default_window,
+                                       justify="left",
+                                       text="",
+                                       borderwidth=2,
+                                       relief="groove")
+        
+        lbl_obtain.grid(row=3, column=0, columnspan=2, sticky="W")
+        lbl_obtained_result.grid(row=4, column=0, columnspan=2, sticky="W")
 
-    lbl_expression.pack() 
+        btn_save['state'] = tk.NORMAL
+
+    def save():
+        save_to_file(obtain_default_window, " ")
+
+    lbl_expression = tk.Label(obtain_default_window,
+                              text="D = A△(B\\(C∪A)∩(C∪¬A) = {}".format(result),
+                              font="Helvetica 12 bold")
+    lbl_sets = tk.Label(obtain_default_window,
+                        text="A = {}\nB = {}\nC = {}".format(A, B, C),
+                        font="Helvetica 12",
+                        justify="left")
+    btn_obtain = tk.Button(obtain_default_window,
+                           text="Розв'язати",
+                           command=obtain)
+    btn_save = tk.Button(obtain_default_window,
+                           text="Зберегти в файл",
+                           state=tk.DISABLED,
+                           command=save)
+
+    lbl_expression.grid(row=0, column=0, columnspan=2, pady=10)
+    lbl_sets.grid(row=1, column=0, columnspan=2, sticky="W")
+    btn_obtain.grid(row=2, column=0, pady=10)
+    btn_save.grid(row=2, column=1, pady=10)
 
 # Enable "manual" entries and disable "random"
 def radio_select_manual():
@@ -127,7 +168,13 @@ def generate_sets():
     U = set(range(start, stop + 1))    
 
     # Output result
-    lbl_result['text'] = "A = {}\nB = {}\nC = {}\nU = {}\n".format(A, B, C, U)   
+    lbl_result['text'] = "A = {}\nB = {}\nC = {}\nU = {}\n".format(A, B, C, U)
+
+    # Give access to result windows
+    btn_obtain_default['state'] = tk.NORMAL 
+    btn_obtain_simplified['state'] = tk.NORMAL
+    btn_symmetric_difference['state'] = tk.NORMAL
+    btn_result['state'] = tk.NORMAL
         
 # Create main window
 root = tk.Tk()
@@ -184,21 +231,25 @@ btn_generate = tk.Button(root,
                         command=generate_sets)
 lbl_result = tk.Label(root,
                     text = "A =\nB =\nC =\nU = \n",
-                    justify = 'left')
+                    justify = "left")
 
 # Windows menu
 btn_obtain_default = tk.Button(root,
                                text="Обчислення заданого виразу",
-                               command=obtain_default)
+                               command=obtain_default,
+                               state=tk.DISABLED)
 btn_obtain_simplified = tk.Button(root,
                                   text="Обчислення спрощенного виразу",
-                                  command=obtain_default)
+                                  command=obtain_default,
+                                  state=tk.DISABLED)
 btn_symmetric_difference = tk.Button(root,
                                 text="Симметрична різниця",
-                                command=obtain_default)
+                                command=obtain_default,
+                                state=tk.DISABLED)
 btn_result = tk.Button(root,
                        text="Результати",
-                       command=obtain_default)
+                       command=obtain_default,
+                       state=tk.DISABLED)
 # Place everything
 btn_info.grid(row=0, column=1)
 rbtn_manual.grid(row=1, column=1)

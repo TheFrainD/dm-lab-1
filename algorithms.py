@@ -18,12 +18,31 @@ def union(A, B):
     B = list(B)
     result = B.copy()
 
-    for i in A:
-        k = True
-        for j in B:
-            if i == j:
-                k = False
-        if k == True:
-            result.append(i)
+    for element in A:
+        if element not in B:
+            result.append(element)
 
+    return set(result)
+
+def crossing(A, B):
+    A = list(A)
+    B = list(B)
+    result = []
+
+    for element in A:
+        if element in A and element in B:
+            result.append(element)
+
+    return set(result)
+
+def difference(A, B):
+    A = list(A)
+    B = list(B)
+    result = []
+
+    for element in A:
+        if element not in B:
+            result.append(element)
+
+    sorted(result)
     return set(result)
