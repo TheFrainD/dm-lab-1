@@ -1,5 +1,6 @@
 import tkinter as tk
 import random
+import pickle
 import algorithms as al
 
 # Initializing sets
@@ -8,9 +9,13 @@ B = set()
 C = set()
 U = set()
 
-def save_to_file(master, input):
+def save_to_file(master, inp):
     msg_window = tk.Toplevel(master)
     msg_window.title("Повідомлення")
+
+    f = open('result.txt', 'ab')
+    pickle.dump(inp, f)
+    f.close()
 
     lbl_msg = tk.Label(msg_window,
                        text="Збережено!",
@@ -55,16 +60,27 @@ def info():
 def obtain_default():
     global A, B, C, U
     
-    result = al.difference(A, B)
+    CUA = al.union(C, A)
+    CUnA = al.union(C, al.not_set(A, U))
+    result = al.symmetric_difference(A, al.difference(B, al.crossing(CUA, CUnA)))
 
     obtain_default_window = tk.Toplevel(root)
     obtain_default_window.title("Обчислення заданого виразу")
 
     def obtain():
-        lbl_obtain = tk.Label(obtain_default_window, text="Розв'язок")
+        lbl_obtain = tk.Label(obtain_default_window, 
+                              text="Розв'язок",
+                              font="Helvetica 12 bold")
         lbl_obtained_result = tk.Label(obtain_default_window,
                                        justify="left",
-                                       text="",
+                                       text="1) ¬A = {}\n".format(al.not_set(A, U)) +
+                                           "2) C∪A = {}\n".format(CUA) +
+                                           "3) C∪¬A = {}\n".format(CUnA) +
+                                           "4) (C∪A)∩(C∪¬A) = {}\n".format(al.crossing(CUA, CUnA)) +
+                                           "5) B\\(C∪A)∩(C∪¬A) = {}\n".format(al.difference(B, al.crossing(CUA, CUnA))) +
+                                           "6) A△(B\\(C∪A)∩(C∪¬A) = {}\n\n".format(result) +
+                                           "Відповідь: {}".format(result),
+                                       font="Helvetica 12",
                                        borderwidth=2,
                                        relief="groove")
         
@@ -74,7 +90,7 @@ def obtain_default():
         btn_save['state'] = tk.NORMAL
 
     def save():
-        save_to_file(obtain_default_window, " ")
+        save_to_file(obtain_default_window, result)
 
     lbl_expression = tk.Label(obtain_default_window,
                               text="D = A△(B\\(C∪A)∩(C∪¬A) = {}".format(result),

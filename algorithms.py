@@ -46,3 +46,14 @@ def difference(A, B):
 
     sorted(result)
     return set(result)
+
+def not_set(A, U):
+    A = list(A)
+    U = list(U)
+    result = []
+
+    for element in U:
+        if element not in A:
+            result.append(element)
+
+    return set(result)
