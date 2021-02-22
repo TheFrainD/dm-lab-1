@@ -1,6 +1,5 @@
 import tkinter as tk
 import random
-import pickle
 import algorithms as al
 
 # Initializing sets
@@ -13,8 +12,10 @@ def save_to_file(master, inp):
     msg_window = tk.Toplevel(master)
     msg_window.title("Повідомлення")
 
-    f = open('result.txt', 'ab')
-    pickle.dump(inp, f)
+    inp = str(inp)
+
+    f = open('result.txt', "w")
+    f.write(inp)
     f.close()
 
     lbl_msg = tk.Label(msg_window,
@@ -103,6 +104,55 @@ def obtain_default():
                            text="Розв'язати",
                            command=obtain)
     btn_save = tk.Button(obtain_default_window,
+                           text="Зберегти в файл",
+                           state=tk.DISABLED,
+                           command=save)
+
+    lbl_expression.grid(row=0, column=0, columnspan=2, pady=10)
+    lbl_sets.grid(row=1, column=0, columnspan=2, sticky="W")
+    btn_obtain.grid(row=2, column=0, pady=10)
+    btn_save.grid(row=2, column=1, pady=10)
+
+def obtain_simplified():
+    global A, B, C, U
+    
+    result = al.symmetric_difference(A, al.difference(B, C))
+
+    obtain_simplified_window = tk.Toplevel(root)
+    obtain_simplified_window.title("Обчислення спрощеного виразу")
+
+    def obtain():
+        lbl_obtain = tk.Label(obtain_simplified_window, 
+                              text="Розв'язок",
+                              font="Helvetica 12 bold")
+        lbl_obtained_result = tk.Label(obtain_simplified_window,
+                                       justify="left",
+                                       text="1) B\\C = {}\n".format(al.difference(B, C)) +
+                                           "2) A△(B\\C) = {}\n\n".format(result) +
+                                           "Відповідь: {}".format(result),
+                                       font="Helvetica 12",
+                                       borderwidth=2,
+                                       relief="groove")
+        
+        lbl_obtain.grid(row=3, column=0, columnspan=2, sticky="W")
+        lbl_obtained_result.grid(row=4, column=0, columnspan=2, sticky="W")
+
+        btn_save['state'] = tk.NORMAL
+
+    def save():
+        save_to_file(obtain_simplified_window, result)
+
+    lbl_expression = tk.Label(obtain_simplified_window,
+                              text="D = A△(B\\C) = {}".format(result),
+                              font="Helvetica 12 bold")
+    lbl_sets = tk.Label(obtain_simplified_window,
+                        text="A = {}\nB = {}\nC = {}".format(A, B, C),
+                        font="Helvetica 12",
+                        justify="left")
+    btn_obtain = tk.Button(obtain_simplified_window,
+                           text="Розв'язати",
+                           command=obtain)
+    btn_save = tk.Button(obtain_simplified_window,
                            text="Зберегти в файл",
                            state=tk.DISABLED,
                            command=save)
@@ -256,7 +306,7 @@ btn_obtain_default = tk.Button(root,
                                state=tk.DISABLED)
 btn_obtain_simplified = tk.Button(root,
                                   text="Обчислення спрощенного виразу",
-                                  command=obtain_default,
+                                  command=obtain_simplified,
                                   state=tk.DISABLED)
 btn_symmetric_difference = tk.Button(root,
                                 text="Симетрична різниця",
