@@ -69,6 +69,7 @@ def obtain_default():
     obtain_default_window.title("Обчислення заданого виразу")
 
     def obtain():
+        btn_obtain['state'] = tk.DISABLED
         lbl_obtain = tk.Label(obtain_default_window, 
                               text="Розв'язок",
                               font="Helvetica 12 bold")
@@ -94,7 +95,7 @@ def obtain_default():
         save_to_file(obtain_default_window, result)
 
     lbl_expression = tk.Label(obtain_default_window,
-                              text="D = A△(B\\(C∪A)∩(C∪¬A) = {}".format(result),
+                              text="D = A△(B\\(C∪A)∩(C∪¬A)",
                               font="Helvetica 12 bold")
     lbl_sets = tk.Label(obtain_default_window,
                         text="A = {}\nB = {}\nC = {}".format(A, B, C),
@@ -122,6 +123,7 @@ def obtain_simplified():
     obtain_simplified_window.title("Обчислення спрощеного виразу")
 
     def obtain():
+        btn_obtain['state'] = tk.DISABLED
         lbl_obtain = tk.Label(obtain_simplified_window, 
                               text="Розв'язок",
                               font="Helvetica 12 bold")
@@ -143,7 +145,7 @@ def obtain_simplified():
         save_to_file(obtain_simplified_window, result)
 
     lbl_expression = tk.Label(obtain_simplified_window,
-                              text="D = A△(B\\C) = {}".format(result),
+                              text="D = A△(B\\C)",
                               font="Helvetica 12 bold")
     lbl_sets = tk.Label(obtain_simplified_window,
                         text="A = {}\nB = {}\nC = {}".format(A, B, C),
@@ -161,6 +163,46 @@ def obtain_simplified():
     lbl_sets.grid(row=1, column=0, columnspan=2, sticky="W")
     btn_obtain.grid(row=2, column=0, pady=10)
     btn_save.grid(row=2, column=1, pady=10)
+
+def obtain_difference():
+    global A, C, U
+    
+    obtain_difference_window = tk.Toplevel(root)
+    obtain_difference_window.title("Симетрична різниця")
+
+    X = A.copy()
+    Y = al.not_set(C, U)
+    Z = al.symmetric_difference(X, Y)
+
+    def obtain():
+        btn_obtain['state'] = tk.DISABLED
+        lbl_obtain = tk.Label(obtain_difference_window, 
+                              text="Розв'язок",
+                              font="Helvetica 12 bold")
+        lbl_obtained_result = tk.Label(obtain_difference_window,
+                                       justify="left",
+                                       text="Z = {}".format(Z),
+                                       font="Helvetica 12",
+                                       borderwidth=2,
+                                       relief="groove")
+        
+        lbl_obtain.pack()
+        lbl_obtained_result.pack()
+
+    lbl_expression = tk.Label(obtain_difference_window,
+                              text="Z = X△Y",
+                              font="Helvetica 12 bold")
+    lbl_sets = tk.Label(obtain_difference_window,
+                        text="X = {}\nY = {}".format(X, Y),
+                        font="Helvetica 12",
+                        justify="left")
+    btn_obtain = tk.Button(obtain_difference_window,
+                           text="Розв'язати",
+                           command=obtain)
+
+    lbl_expression.pack()
+    lbl_sets.pack()
+    btn_obtain.pack()
 
 # Enable "manual" entries and disable "random"
 def radio_select_manual():
@@ -310,7 +352,7 @@ btn_obtain_simplified = tk.Button(root,
                                   state=tk.DISABLED)
 btn_symmetric_difference = tk.Button(root,
                                 text="Симетрична різниця",
-                                command=obtain_default,
+                                command=obtain_difference,
                                 state=tk.DISABLED)
 btn_result = tk.Button(root,
                        text="Результати",
