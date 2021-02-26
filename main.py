@@ -1,5 +1,6 @@
 import tkinter as tk
 import random
+import pickle
 import algorithms as al
 
 # Initializing sets
@@ -8,14 +9,12 @@ B = set()
 C = set()
 U = set()
 
-def save_to_file(master, inp):
+def save_to_file(master, filename, obj):
     msg_window = tk.Toplevel(master)
     msg_window.title("Повідомлення")
 
-    inp = str(inp)
-
-    f = open('result.txt', "w")
-    f.write(inp)
+    f = open(filename, "wb")
+    pickle.dump(obj, f)
     f.close()
 
     lbl_msg = tk.Label(msg_window,
@@ -92,7 +91,7 @@ def obtain_default():
         btn_save['state'] = tk.NORMAL
 
     def save():
-        save_to_file(obtain_default_window, result)
+        save_to_file(obtain_default_window, "default_result.txt", result)
 
     lbl_expression = tk.Label(obtain_default_window,
                               text="D = A△(B\\(C∪A)∩(C∪¬A)",
@@ -142,7 +141,7 @@ def obtain_simplified():
         btn_save['state'] = tk.NORMAL
 
     def save():
-        save_to_file(obtain_simplified_window, result)
+        save_to_file(obtain_simplified_window, "simplified_result.txt", result)
 
     lbl_expression = tk.Label(obtain_simplified_window,
                               text="D = A△(B\\C)",
@@ -176,6 +175,8 @@ def obtain_difference():
 
     def obtain():
         btn_obtain['state'] = tk.DISABLED
+        btn_save['state'] = tk.NORMAL
+
         lbl_obtain = tk.Label(obtain_difference_window, 
                               text="Розв'язок",
                               font="Helvetica 12 bold")
@@ -186,8 +187,11 @@ def obtain_difference():
                                        borderwidth=2,
                                        relief="groove")
         
-        lbl_obtain.pack()
-        lbl_obtained_result.pack()
+        lbl_obtain.grid(row=3, column=0, columnspan=2, sticky="W")
+        lbl_obtained_result.grid(row=4, column=0, columnspan=2, sticky="W")
+
+    def save():
+        save_to_file(obtain_difference_window, "difference_result.txt", Z)
 
     lbl_expression = tk.Label(obtain_difference_window,
                               text="Z = X△Y",
@@ -199,10 +203,92 @@ def obtain_difference():
     btn_obtain = tk.Button(obtain_difference_window,
                            text="Розв'язати",
                            command=obtain)
+    btn_save = tk.Button(obtain_difference_window,
+                        text="Зберегти в файл",
+                        state=tk.DISABLED,
+                        command=save)
 
-    lbl_expression.pack()
-    lbl_sets.pack()
-    btn_obtain.pack()
+    lbl_expression.grid(row=0, column=0, columnspan=2, pady=10)
+    lbl_sets.grid(row=1, column=0, columnspan=2, sticky="W")
+    btn_obtain.grid(row=2, column=0, pady=10)
+    btn_save.grid(row=2, column=1, pady=10)
+
+def compare_sets():
+    global A, C, U
+
+    def compare():
+        if D_default == D_simplified:
+            lbl_obtain_compare['text'] = "Результати збігаються!"
+            lbl_obtain_compare['fg'] = "green"
+        else:
+            lbl_obtain_compare['text'] = "Результати не збігаються!"
+            lbl_obtain_compare['fg'] = "red"
+
+        if Z == Z_handmade:
+            lbl_difference_compare['text'] = "Результати збігаються!"
+            lbl_difference_compare['fg'] = "green"
+        else:
+            lbl_obtain_compare['text'] = "Результати не збігаються!"
+            lbl_difference_compare['fg'] = "red"
+
+    f = open("default_result.txt", "rb")
+    D_default = pickle.load(f)
+    f.close() 
+
+    f = open("simplified_result.txt", "rb")
+    D_simplified = pickle.load(f)
+    f.close() 
+
+    f = open("difference_result.txt", "rb")
+    Z_handmade = pickle.load(f)
+    f.close() 
+
+    X = A.copy()
+    Y = al.not_set(C, U)
+    Z = X.symmetric_difference(Y)
+
+    comapare_window = tk.Toplevel(root)
+    comapare_window.title("Результати")
+
+    lbl_title = tk.Label(comapare_window,
+                        text="Порівняння результатів",
+                        font="Helvetica 12 bold")
+    lbl_obtain = tk.Label(comapare_window, 
+                          text="Множина D",
+                          font="Helvetica 12")
+    lbl_obtained_result = tk.Label(comapare_window,
+                                  justify="left",
+                                  text="D = A△(B\\(C∪A)∩(C∪¬A) = {}\n".format(D_default) +
+                                  "D = A△(B\\C) = {}".format(D_simplified),
+                                  font="Helvetica 12",
+                                  borderwidth=2,
+                                  relief="groove")
+    lbl_obtain_compare = tk.Label(comapare_window, 
+                                  text="  ")
+    lbl_difference = tk.Label(comapare_window, 
+                              text="Множина Z",
+                              font="Helvetica 12")
+    lbl_difference_result = tk.Label(comapare_window,
+                                    justify="left",
+                                    text="Z(Власний алгоритм) = X△Y = {}\n".format(Z_handmade) +
+                                    "Z(Python алгоритм) = X△Y = {}".format(Z),
+                                    font="Helvetica 12",
+                                    borderwidth=2,
+                                    relief="groove")
+    lbl_difference_compare = tk.Label(comapare_window, 
+                                      text="  ")
+    btn_compare = tk.Button(comapare_window,
+                            text="Порівняти результати",
+                            command=compare)
+    
+    lbl_title.pack(pady=10)
+    lbl_obtain.pack()
+    lbl_obtained_result.pack()
+    lbl_obtain_compare.pack()
+    lbl_difference.pack()
+    lbl_difference_result.pack()
+    lbl_difference_compare.pack()
+    btn_compare.pack()
 
 # Enable "manual" entries and disable "random"
 def radio_select_manual():
@@ -356,7 +442,7 @@ btn_symmetric_difference = tk.Button(root,
                                 state=tk.DISABLED)
 btn_result = tk.Button(root,
                        text="Результати",
-                       command=obtain_default,
+                       command=compare_sets,
                        state=tk.DISABLED)
 # Place everything
 btn_info.grid(row=0, column=1)
